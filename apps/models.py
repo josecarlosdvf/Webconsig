@@ -25,25 +25,26 @@ class BaseModel:
     def get_list(cls):
         return cls.query.all()
     
+    def _handle_db_error(self, e: SQLAlchemyError) -> None:
+        """Helper method to handle database errors consistently"""
+        db.session.rollback()
+        db.session.close()
+        error = str(e.__dict__.get('orig', str(e)))
+        raise InvalidUsage(error, 422)
+    
     def save(self) -> None:
         try:
             db.session.add(self)
             db.session.commit()
         except SQLAlchemyError as e:
-            db.session.rollback()
-            db.session.close()
-            error = str(e.__dict__.get('orig', str(e)))
-            raise InvalidUsage(error, 422)
+            self._handle_db_error(e)
     
     def delete(self) -> None:
         try:
             db.session.delete(self)
             db.session.commit()
         except SQLAlchemyError as e:
-            db.session.rollback()
-            db.session.close()
-            error = str(e.__dict__.get('orig', str(e)))
-            raise InvalidUsage(error, 422)
+            self._handle_db_error(e)
 
 # Add your CRM models here
 # Example:
@@ -57,3 +58,6 @@ class BaseModel:
 #     company = db.Column(db.String(128))
 #     date_created = db.Column(db.DateTime, default=dt.datetime.utcnow)
 #     date_modified = db.Column(db.DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow)
+#
+#     def __repr__(self):
+#         return f"<Customer {self.name}>"

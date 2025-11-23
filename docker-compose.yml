@@ -5,9 +5,9 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_USER: webconsig_user
-      POSTGRES_PASSWORD: webconsig_pass
-      POSTGRES_DB: webconsig_db
+      POSTGRES_USER: ${DB_USERNAME:-webconsig_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-CHANGE_ME_IN_PRODUCTION}
+      POSTGRES_DB: ${DB_NAME:-webconsig_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -35,13 +35,14 @@ services:
     build: .
     environment:
       DB_ENGINE: postgresql
-      DB_NAME: webconsig_db
+      DB_NAME: ${DB_NAME:-webconsig_db}
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USERNAME: webconsig_user
-      DB_PASS: webconsig_pass
+      DB_USERNAME: ${DB_USERNAME:-webconsig_user}
+      DB_PASS: ${DB_PASS:-CHANGE_ME_IN_PRODUCTION}
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-CHANGE_ME_IN_PRODUCTION}
     networks:
       - db_network
       - web_network
