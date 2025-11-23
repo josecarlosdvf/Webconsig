@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-Copyright (c) 2019 - present AppSeed.us
+Webconsig CRM System - Configuration
 """
 
 import os
@@ -76,8 +76,10 @@ class Config(object):
         # This will create a file in <app> FOLDER
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 
+    # Dynamic DataTables configuration
+    # Add your CRM models here as needed
     DYNAMIC_DATATB = {
-        "products": "apps.models.Product"
+        # Example: "customers": "apps.models.Customer"
     }
 
     CDN_DOMAIN = os.getenv('CDN_DOMAIN')

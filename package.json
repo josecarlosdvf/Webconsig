@@ -1,7 +1,7 @@
 {
-  "name": "flask-datta-able",
+  "name": "webconsig-crm",
   "version": "1.0.0",
-  "description": "",
+  "description": "Webconsig - Modern CRM System built with Flask and PostgreSQL",
   "main": "index.js",
   "scripts": {
     "dev": "vite build --watch --mode development",
