@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-Copyright (c) 2019 - present AppSeed.us
+Webconsig CRM System - Authentication Routes
 """
 
 from flask import render_template, redirect, request, url_for

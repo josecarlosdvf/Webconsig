@@ -1,14 +1,59 @@
 version: '3.8'
 services:
-  appseed-app:
-    container_name: appseed_app
+  postgres:
+    container_name: webconsig_postgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-webconsig_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-CHANGE_ME_IN_PRODUCTION}
+      POSTGRES_DB: ${DB_NAME:-webconsig_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webconsig_user -d webconsig_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  redis:
+    container_name: webconsig_redis
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - db_network
+    ports:
+      - "6379:6379"
+  
+  webconsig-app:
+    container_name: webconsig_app
     restart: always
     build: .
+    environment:
+      DB_ENGINE: postgresql
+      DB_NAME: ${DB_NAME:-webconsig_db}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-webconsig_user}
+      DB_PASS: ${DB_PASS:-CHANGE_ME_IN_PRODUCTION}
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-CHANGE_ME_IN_PRODUCTION}
     networks:
       - db_network
       - web_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  
   nginx:
-    container_name: nginx
+    container_name: webconsig_nginx
     restart: always
     image: "nginx:latest"
     ports:
@@ -18,7 +63,11 @@ services:
     networks:
       - web_network
     depends_on: 
-      - appseed-app
+      - webconsig-app
+
+volumes:
+  postgres_data:
+
 networks:
   db_network:
     driver: bridge
